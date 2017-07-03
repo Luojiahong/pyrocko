@@ -276,7 +276,7 @@ Get your InSAR displacement maps handled the pyrocko way (and prepared for the d
         </span>
         <span class="tag doi">
             <i class="fa fa-university" aria-hidden="true"></i>
-            <a href="">DOI: In Preparation</a>
+            <a href="http://doi.org/10.5880/GFZ.2.1.2017.002">DOI: 10.5880/GFZ.2.1.2017.002</a>
         </span>
     </div>
 
@@ -306,7 +306,7 @@ Fault ruptures and volcanic plumbing systems are complex and highly interactive 
     <div class="application-tags">
         <span class="tag doi">
             <i class="fa fa-university" aria-hidden="true"></i>
-            <a href="">DOI: In Preparation</a>
+            <a href="http://doi.org/10.5880/GFZ.2.1.2017.002">DOI: 10.5880/GFZ.2.1.2017.002</a>
         </span>
     </div>
 
