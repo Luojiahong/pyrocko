@@ -320,6 +320,9 @@ Publications
     Heimann, Sebastian; Kriegerowski, Marius; Dahm, Torsten; Simone, Cesca; Wang, Rongjiang: **A Green's function database platform for seismological research and education: applications and examples**. EGU General Assembly 2016, held 17-22 April, 2016 in Vienna Austria, p.15292
 
 
+    Isken, Marius; Sudhaus, Henriette; Heimann, Sebastian; Steinberg, Andreas; Daout, Simon; Vasyura-Bathke, Hannes (2017): **Kite - Software for Rapid Earthquake Source Optimisation from InSAR Surface Displacement**. V. 0.1. GFZ Data Services. http://doi.org/10.5880/GFZ.2.1.2017.002
+
+
 .. meta::
     :description: Pyrocko is an open source seismology environment.
     :keywords: Seismology, Earthquake, Geodesy, Earth, Science, Software, Python, software development, open-source, modelling, waveforms, processing, insar, surface deformation
