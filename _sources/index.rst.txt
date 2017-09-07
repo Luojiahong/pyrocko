@@ -304,6 +304,10 @@ Fault ruptures and volcanic plumbing systems are complex and highly interactive 
 .. raw:: html
     
     <div class="application-tags">
+        <span class="tag">
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+            <a href="https://pyrocko.github.io/kite/talpa.html">Examples and Documentation</a>
+        </span>
         <span class="tag doi">
             <i class="fa fa-university" aria-hidden="true"></i>
             <a href="http://doi.org/10.5880/GFZ.2.1.2017.002">DOI: 10.5880/GFZ.2.1.2017.002</a>
