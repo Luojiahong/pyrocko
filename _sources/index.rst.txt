@@ -26,7 +26,7 @@ Pyrocko framework
 =================
 
 At its core, Pyrocko is a library and framework providing building blocks for
-researchers and students wishing to develop there own applications. 
+researchers and students wishing to develop their own applications. 
 
 .. raw:: html
 
