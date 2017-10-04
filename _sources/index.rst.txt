@@ -82,7 +82,7 @@ Snuffler
 .. image:: _static/snuffler_screenshot.png
     :align: left
 
-The Snuffler is an interactive and extendible seismogram browser that is suited for small and very big datasets and archives. It features plugins (called `Snufflings
+The Snuffler is an interactive and extensible seismogram browser that is suited for small and very big datasets and archives. It features plugins (called `Snufflings
 <http://pyrocko.org/v0.3/apps/snuffler/extensions.html>`_), which are helpful
 for broad variety of seismological applications. Features include:
 
@@ -315,6 +315,8 @@ Fault ruptures and volcanic plumbing systems are complex and highly interactive 
     </div>
 
 
+.. _publications:
+
 Publications
 ============
 
@@ -325,6 +327,21 @@ Publications
 
 
     Isken, Marius; Sudhaus, Henriette; Heimann, Sebastian; Steinberg, Andreas; Daout, Simon; Vasyura-Bathke, Hannes (2017): **Kite - Software for Rapid Earthquake Source Optimisation from InSAR Surface Displacement**. V. 0.1. GFZ Data Services. http://doi.org/10.5880/GFZ.2.1.2017.002
+
+
+.. _material:
+
+Material
+========
+
+    Pyrocko Overview Poster - `Download <http://data.pyrocko.org/material/pyrocko-poster-201709.pdf>`_
+
+    Pyrockos' Green's Function Poster - `Download <http://data.pyrocko.org/material/pyrocko-gf-poster-2014.pdf>`_
+
+    Kite Overview and Earthquake Inversion Poster - `Download <http://data.pyrocko.org/material/kite-poster-201709.pdf>`_
+
+
+
 
 
 .. meta::
