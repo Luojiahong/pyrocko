@@ -336,7 +336,7 @@ Material
 
     Pyrocko Overview Poster - `Download <http://data.pyrocko.org/material/pyrocko-poster-201709.pdf>`_
 
-    Pyrockos' Green's Function Poster - `Download <http://data.pyrocko.org/material/pyrocko-gf-poster-2014.pdf>`_
+    Pyrocko Green's Function Poster - `Download <http://data.pyrocko.org/material/pyrocko-gf-poster-2014.pdf>`_
 
     Kite Overview and Earthquake Inversion Poster - `Download <http://data.pyrocko.org/material/kite-poster-201709.pdf>`_
 
