@@ -302,6 +302,7 @@
 <span class="sd">      Range(0, 10e3, 1e3)</span>
 <span class="sd">      Range(&#39;0 .. 10k @ 11&#39;)</span>
 <span class="sd">      Range(start=0., stop=10*km, n=11)</span>
+
 <span class="sd">      Range(0, 10e3, n=11)</span>
 <span class="sd">      Range(values=[x*1e3 for x in range(11)])</span>
 
@@ -858,6 +859,59 @@
 
     <span class="k">def</span> <span class="nf">base_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">anchor</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
+
+
+<span class="k">class</span> <span class="nc">SmoothRampSTF</span><span class="p">(</span><span class="n">STF</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Smooth-ramp type source time function for near-field displacement.</span>
+<span class="sd">    Based on moment function of double-couple point source proposed by Bruestle</span>
+<span class="sd">    and Mueller (PEPI, 1983).</span>
+
+<span class="sd">    .. [1] W. Bruestle, G. Mueller (1983), Moment and duration of shallow</span>
+<span class="sd">        earthquakes from Love-wave modelling for regional distances, PEPI 32,</span>
+<span class="sd">        312-324.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">Float</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">&#39;duration of the ramp (baseline)&#39;</span><span class="p">)</span>
+
+    <span class="n">rise_ratio</span> <span class="o">=</span> <span class="n">Float</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">&#39;fraction of time compared to duration, &#39;</span>
+             <span class="s">&#39;when the maximum amplitude is reached&#39;</span><span class="p">)</span>
+
+    <span class="n">anchor</span> <span class="o">=</span> <span class="n">Float</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">&#39;anchor point with respect to source.time: (&#39;</span>
+             <span class="s">&#39;-1.0: left -&gt; source duration ``[0, T]`` ~ hypocenter time, &#39;</span>
+             <span class="s">&#39;0.0: center -&gt; source duration ``[-T/2, T/2]`` ~ centroid time, &#39;</span>
+             <span class="s">&#39;+1.0: right -&gt; source duration ``[-T, 0]`` ~ rupture end time)&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">discretize_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deltat</span><span class="p">,</span> <span class="n">tref</span><span class="p">):</span>
+        <span class="n">tmin_stf</span> <span class="o">=</span> <span class="n">tref</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anchor</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="n">tmax_stf</span> <span class="o">=</span> <span class="n">tref</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">anchor</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="n">tmin</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">tmin_stf</span> <span class="o">/</span> <span class="n">deltat</span><span class="p">)</span> <span class="o">*</span> <span class="n">deltat</span>
+        <span class="n">tmax</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">tmax_stf</span> <span class="o">/</span> <span class="n">deltat</span><span class="p">)</span> <span class="o">*</span> <span class="n">deltat</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">tmax</span> <span class="o">-</span> <span class="n">tmin</span><span class="p">)</span><span class="o">/</span><span class="n">deltat</span><span class="p">)</span> <span class="o">*</span> <span class="n">deltat</span>
+        <span class="n">nt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">D</span><span class="o">/</span><span class="n">deltat</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="p">,</span> <span class="n">nt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nt</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">rise_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rise_ratio</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
+            <span class="n">amplitudes</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+            <span class="n">tp</span> <span class="o">=</span> <span class="n">tmin</span> <span class="o">+</span> <span class="n">rise_time</span>
+            <span class="n">ii</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">times</span> <span class="o">&lt;=</span> <span class="n">tp</span><span class="p">)</span>
+            <span class="n">t_inc</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">t_inc</span> <span class="o">-</span> <span class="n">tmin_stf</span><span class="p">)</span> <span class="o">/</span> <span class="n">rise_time</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">num</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">t_inc</span> <span class="o">-</span> <span class="n">tmin_stf</span><span class="p">)</span> <span class="o">/</span> <span class="n">rise_time</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span>
+            <span class="n">amplitudes</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.</span><span class="o">/</span><span class="mf">16.</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">9.</span><span class="p">)</span><span class="o">*</span><span class="n">b</span><span class="p">)</span>
+
+            <span class="n">amplitudes</span> <span class="o">/=</span> <span class="n">num</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">amplitudes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">amplitudes</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">times</span><span class="p">,</span> <span class="n">amplitudes</span>
+
+    <span class="k">def</span> <span class="nf">base_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rise_ratio</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">anchor</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="STFMode"><a class="viewcode-back" href="../../../library/reference/gf.html#pyrocko.gf.seismosizer.STFMode">[docs]</a><span class="k">class</span> <span class="nc">STFMode</span><span class="p">(</span><span class="n">StringChoice</span><span class="p">):</span>
@@ -2495,9 +2549,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">store_superdirs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">gf_store_superdirs</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">store_dirs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">gf_store_dirs</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_store_dirs_type</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_id_to_store_dir</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_open_stores</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_effective_default_store_id</span> <span class="o">=</span> <span class="k">None</span>
+
+    <span class="k">def</span> <span class="nf">_check_store_dirs_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sdir</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;store_dirs&#39;</span><span class="p">,</span> <span class="s">&#39;store_superdirs&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="n">sdir</span><span class="p">),</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;{} of {} is not of type list&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">sdir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_get_store_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_dir</span><span class="p">):</span>
         <span class="n">store_</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">Store</span><span class="p">(</span><span class="n">store_dir</span><span class="p">)</span>
@@ -2863,7 +2924,7 @@
 
             <span class="k">for</span> <span class="n">ii_results</span><span class="p">,</span> <span class="n">tcounters_static</span> <span class="ow">in</span> <span class="n">process_static</span><span class="p">(</span>
               <span class="n">work_static</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">sources</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">targets</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>
-              <span class="n">nthreads</span><span class="o">=</span><span class="n">nprocs</span><span class="p">):</span>
+              <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">):</span>
 
                 <span class="n">tcounters_static_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">tcounters_static</span><span class="p">))</span>
                 <span class="n">isource</span><span class="p">,</span> <span class="n">itarget</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="n">ii_results</span>

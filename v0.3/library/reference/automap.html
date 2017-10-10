@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Automap module &#8212; Pyrocko v0.3 Manual</title>
+    
+    <link rel="stylesheet" href="../../_static/pydoctheme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within Pyrocko v0.3 Manual"
+          href="../../_static/opensearch.xml"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="The trace module" href="trace.html" />
+    <link rel="prev" title="The tectonics module" href="tectonics.html" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="shortcut icon" type="image/png" href="../../_static/favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=0.8">
+    
+    
+    
+
+  </head>
+  <body role="document">
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
+        <li><a href="../../index.html">Pyrocko v0.3 Manual</a> &#187;</li>
+          <li><a href="../index.html" >Library</a> &#187;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-automap-module">
+<h1>The <code class="xref py py-mod docutils literal"><span class="pre">Automap</span></code> module<a class="headerlink" href="#the-automap-module" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pyrocko.automap.Map">
+<em class="property">class </em><code class="descname">Map</code><span class="sig-paren">(</span><em>gmtversion='newest'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/automap.html#Map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.automap.Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undocumented.</p>
+<dl class="gattribute">
+<dt id="Map.lat">
+<em class="property">♦ </em><code class="descname">lat</code><a class="headerlink" href="#Map.lat" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>optional</em></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.lon">
+<em class="property">♦ </em><code class="descname">lon</code><a class="headerlink" href="#Map.lon" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>optional</em></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.radius">
+<em class="property">♦ </em><code class="descname">radius</code><a class="headerlink" href="#Map.radius" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>optional</em></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.width">
+<em class="property">♦ </em><code class="descname">width</code><a class="headerlink" href="#Map.width" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">20.0</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.height">
+<em class="property">♦ </em><code class="descname">height</code><a class="headerlink" href="#Map.height" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">14.0</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.margins">
+<em class="property">♦ </em><code class="descname">margins</code><a class="headerlink" href="#Map.margins" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">list</span></code> of <code class="docutils literal"><span class="pre">float</span></code> objects, <em>default:</em> <code class="docutils literal"><span class="pre">[]</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.illuminate">
+<em class="property">♦ </em><code class="descname">illuminate</code><a class="headerlink" href="#Map.illuminate" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">True</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.skip_feature_factor">
+<em class="property">♦ </em><code class="descname">skip_feature_factor</code><a class="headerlink" href="#Map.skip_feature_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">0.02</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.show_grid">
+<em class="property">♦ </em><code class="descname">show_grid</code><a class="headerlink" href="#Map.show_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">False</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.show_topo">
+<em class="property">♦ </em><code class="descname">show_topo</code><a class="headerlink" href="#Map.show_topo" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">True</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.show_topo_scale">
+<em class="property">♦ </em><code class="descname">show_topo_scale</code><a class="headerlink" href="#Map.show_topo_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">False</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.show_center_mark">
+<em class="property">♦ </em><code class="descname">show_center_mark</code><a class="headerlink" href="#Map.show_center_mark" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">False</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.show_rivers">
+<em class="property">♦ </em><code class="descname">show_rivers</code><a class="headerlink" href="#Map.show_rivers" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">True</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.show_plates">
+<em class="property">♦ </em><code class="descname">show_plates</code><a class="headerlink" href="#Map.show_plates" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">bool</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">False</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.illuminate_factor_land">
+<em class="property">♦ </em><code class="descname">illuminate_factor_land</code><a class="headerlink" href="#Map.illuminate_factor_land" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">0.5</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.illuminate_factor_ocean">
+<em class="property">♦ </em><code class="descname">illuminate_factor_ocean</code><a class="headerlink" href="#Map.illuminate_factor_ocean" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">0.25</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.color_wet">
+<em class="property">♦ </em><code class="descname">color_wet</code><a class="headerlink" href="#Map.color_wet" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">tuple</span></code> of 3 <code class="docutils literal"><span class="pre">int</span></code> objects, <em>default:</em> <code class="docutils literal"><span class="pre">(216,</span> <span class="pre">242,</span> <span class="pre">254)</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.color_dry">
+<em class="property">♦ </em><code class="descname">color_dry</code><a class="headerlink" href="#Map.color_dry" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">tuple</span></code> of 3 <code class="docutils literal"><span class="pre">int</span></code> objects, <em>default:</em> <code class="docutils literal"><span class="pre">(172,</span> <span class="pre">208,</span> <span class="pre">165)</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.topo_resolution_min">
+<em class="property">♦ </em><code class="descname">topo_resolution_min</code><a class="headerlink" href="#Map.topo_resolution_min" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">40.0</span></code></p>
+<p>minimum resolution of topography [dpi]</p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.topo_resolution_max">
+<em class="property">♦ </em><code class="descname">topo_resolution_max</code><a class="headerlink" href="#Map.topo_resolution_max" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">200.0</span></code></p>
+<p>maximum resolution of topography [dpi]</p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.replace_topo_color_only">
+<em class="property">♦ </em><code class="descname">replace_topo_color_only</code><a class="headerlink" href="#Map.replace_topo_color_only" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">FloatTile</span></code>, <em>optional</em></p>
+<p>replace topo color while keeping topographic shading</p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.topo_cpt_wet">
+<em class="property">♦ </em><code class="descname">topo_cpt_wet</code><a class="headerlink" href="#Map.topo_cpt_wet" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">str</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">'light_sea'</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.topo_cpt_dry">
+<em class="property">♦ </em><code class="descname">topo_cpt_dry</code><a class="headerlink" href="#Map.topo_cpt_dry" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">str</span></code>, <em>default:</em> <code class="docutils literal"><span class="pre">'light_land'</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.axes_layout">
+<em class="property">♦ </em><code class="descname">axes_layout</code><a class="headerlink" href="#Map.axes_layout" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">str</span></code>, <em>optional</em></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.custom_cities">
+<em class="property">♦ </em><code class="descname">custom_cities</code><a class="headerlink" href="#Map.custom_cities" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">list</span></code> of <code class="xref py py-class docutils literal"><span class="pre">City</span></code> objects, <em>default:</em> <code class="docutils literal"><span class="pre">[]</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.gmt_config">
+<em class="property">♦ </em><code class="descname">gmt_config</code><a class="headerlink" href="#Map.gmt_config" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">dict</span></code> of <code class="docutils literal"><span class="pre">str</span></code> objects, <em>default:</em> <code class="docutils literal"><span class="pre">{}</span></code></p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="Map.comment">
+<em class="property">♦ </em><code class="descname">comment</code><a class="headerlink" href="#Map.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">str</span></code>, <em>optional</em></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyrocko.automap.Map.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>outpath</em>, <em>resolution=75.0</em>, <em>oversample=2.0</em>, <em>size=None</em>, <em>width=None</em>, <em>height=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/automap.html#Map.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.automap.Map.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the image.</p>
+<p>Save the image to <code class="docutils literal"><span class="pre">outpath</span></code>. The format is determined by the filename
+extension. Formats are handled as follows: <code class="docutils literal"><span class="pre">'.eps'</span></code> and <code class="docutils literal"><span class="pre">'.ps'</span></code>
+produce EPS and PS, respectively, directly with GMT. If the file name
+ends with <code class="docutils literal"><span class="pre">'.pdf'</span></code>, GMT output is fed through <code class="docutils literal"><span class="pre">gmtpy-epstopdf</span></code> to
+create a PDF file. For any other filename extension, output is first
+converted to PDF with <code class="docutils literal"><span class="pre">gmtpy-epstopdf</span></code>, then with <code class="docutils literal"><span class="pre">pdftocairo</span></code> to
+PNG with a resolution oversampled by the factor <code class="docutils literal"><span class="pre">oversample</span></code> and
+finally the PNG is downsampled and converted to the target format with
+<code class="docutils literal"><span class="pre">convert</span></code>. The resolution of rasterized target image can be
+controlled either by <code class="docutils literal"><span class="pre">resolution</span></code> in DPI or by specifying <code class="docutils literal"><span class="pre">width</span></code>
+or <code class="docutils literal"><span class="pre">height</span></code> or <code class="docutils literal"><span class="pre">size</span></code>, where the latter fits the image into a
+square with given side length.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+    &nbsp;
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="trace.html" title="The trace module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tectonics.html" title="The tectonics module"
+             accesskey="P">previous</a> |</li>
+      </ul>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, The Pyrocko Developers.
+    </div>
+  </body>
+</html>

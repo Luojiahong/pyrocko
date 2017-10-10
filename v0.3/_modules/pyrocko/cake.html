@@ -1105,6 +1105,22 @@
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
 
 
+<span class="k">def</span> <span class="nf">to_phase_defs</span><span class="p">(</span><span class="n">phases</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phases</span><span class="p">,</span> <span class="p">(</span><span class="n">basestring</span><span class="p">,</span> <span class="n">PhaseDef</span><span class="p">)):</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="p">[</span><span class="n">phases</span><span class="p">]</span>
+
+    <span class="n">phases_out</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+            <span class="n">phases_out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">PhaseDef</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">phase</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">PhaseDef</span><span class="p">):</span>
+            <span class="n">phases_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PhaseDefParseError</span><span class="p">(</span><span class="s">&#39;invalid phase definition&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">phases_out</span>
+
+
 <span class="k">def</span> <span class="nf">csswap</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">cmath</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
@@ -3205,7 +3221,9 @@
 <span class="sd">        Get all possible ray paths for given source and receiver depths for one</span>
 <span class="sd">        or more phase definitions.</span>
 
-<span class="sd">        :param phases: a :py:class:`PhaseDef` object or a list of such objects</span>
+<span class="sd">        :param phases: a :py:class:`PhaseDef` object or a list of such objects.</span>
+<span class="sd">            Comma-separated strings and lists of such strings are also accepted</span>
+<span class="sd">            and are converted to :py:class:`PhaseDef` objects for convenience.</span>
 <span class="sd">        :param zstart: source depth [m]</span>
 <span class="sd">        :param zstop: receiver depth [m]</span>
 <span class="sd">        :returns: a list of :py:class:`RayPath` objects</span>
@@ -3217,8 +3235,7 @@
 
         <span class="n">eps</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">7</span>  <span class="c"># num.finfo(float).eps * 1000.</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">phases</span><span class="p">,</span> <span class="n">PhaseDef</span><span class="p">):</span>
-            <span class="n">phases</span> <span class="o">=</span> <span class="p">[</span><span class="n">phases</span><span class="p">]</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="n">to_phase_defs</span><span class="p">(</span><span class="n">phases</span><span class="p">)</span>
 
         <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">:</span>
@@ -3347,7 +3364,9 @@
         <span class="sd">&#39;&#39;&#39;Compute rays and traveltimes for given distances.</span>
 
 <span class="sd">        :param distances: list or array of distances [deg]</span>
-<span class="sd">        :param phases: a :py:class:`PhaseDef` object or a list of such objects</span>
+<span class="sd">        :param phases: a :py:class:`PhaseDef` object or a list of such objects.</span>
+<span class="sd">            Comma-separated strings and lists of such strings are also accepted</span>
+<span class="sd">            and are converted to :py:class:`PhaseDef` objects for convenience.</span>
 <span class="sd">        :param zstart: source depth [m]</span>
 <span class="sd">        :param zstop: receiver depth [m]</span>
 <span class="sd">        :param refine: bool flag, whether to use bisectioning to improve</span>

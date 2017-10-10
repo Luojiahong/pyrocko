@@ -73,8 +73,8 @@
 <span class="kn">from</span> <span class="nn">pyrocko</span> <span class="k">import</span> <span class="n">pile</span><span class="p">,</span> <span class="n">config</span>
 
 <span class="kn">from</span> <span class="nn">pyrocko.gui_util</span> <span class="k">import</span> <span class="n">ValControl</span><span class="p">,</span> <span class="n">LinValControl</span><span class="p">,</span> <span class="n">FigureFrame</span><span class="p">,</span> \
-    <span class="n">WebKitFrame</span><span class="p">,</span> <span class="n">VTKFrame</span><span class="p">,</span> <span class="n">Marker</span><span class="p">,</span> <span class="n">EventMarker</span><span class="p">,</span> <span class="n">PhaseMarker</span><span class="p">,</span> <span class="n">load_markers</span><span class="p">,</span> \
-    <span class="n">save_markers</span>
+    <span class="n">WebKitFrame</span><span class="p">,</span> <span class="n">VTKFrame</span><span class="p">,</span> <span class="n">PixmapFrame</span><span class="p">,</span> <span class="n">Marker</span><span class="p">,</span> <span class="n">EventMarker</span><span class="p">,</span> <span class="n">PhaseMarker</span><span class="p">,</span> \
+    <span class="n">load_markers</span><span class="p">,</span> <span class="n">save_markers</span>
 
 
 <span class="n">Marker</span><span class="p">,</span> <span class="n">load_markers</span><span class="p">,</span> <span class="n">save_markers</span>  <span class="c"># noqa</span>
@@ -550,6 +550,18 @@
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pylab</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">get</span><span class="o">=</span><span class="s">&#39;figure_frame&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Snuffling.pixmap_frame"><a class="viewcode-back" href="../../library/reference/snuffling.html#pyrocko.snuffling.Snuffling.pixmap_frame">[docs]</a>    <span class="k">def</span> <span class="nf">pixmap_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Create a :py:class:`pyrocko.gui_util.PixmapFrame`</span>
+
+<span class="sd">        :param name: labels the tab</span>
+<span class="sd">        :param filename: name of file to be displayed</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="n">PixmapFrame</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_panel_parent</span><span class="o">.</span><span class="n">add_tab</span><span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="s">&quot;Pixmap&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span></div>
 
 <div class="viewcode-block" id="Snuffling.web_frame"><a class="viewcode-back" href="../../library/reference/snuffling.html#pyrocko.snuffling.Snuffling.web_frame">[docs]</a>    <span class="k">def</span> <span class="nf">web_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>

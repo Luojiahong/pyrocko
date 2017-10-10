@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyrocko.gshhg &#8212; Pyrocko v0.3 Manual</title>
+    
+    <link rel="stylesheet" href="../../_static/pydoctheme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within Pyrocko v0.3 Manual"
+          href="../../_static/opensearch.xml"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <link rel="shortcut icon" type="image/png" href="../../_static/favicon.png" />
+    <meta name="viewport" content="width=device-width,initial-scale=0.8">
+    
+    
+    
+
+  </head>
+  <body role="document">
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="responsive-menu"><a href="#sidebar-anchor" title="Navigation">&#9776;</a></li>
+        <li><a href="../../index.html">Pyrocko v0.3 Manual</a> &#187;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pyrocko.gshhg</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">num</span>
+
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">config</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">orthodrome</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;pyrocko.gshhg&#39;</span><span class="p">)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
+
+<span class="n">km</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e3</span>
+<span class="n">micro_deg</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span>
+
+
+<div class="viewcode-block" id="Polygon"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon">[docs]</a><span class="k">class</span> <span class="nc">Polygon</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Representation of a GSHHG polygon. &#39;&#39;&#39;</span>
+    <span class="n">RIVER_NOT_SET</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">LEVELS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;LAND&#39;</span><span class="p">,</span> <span class="s">&#39;LAKE&#39;</span><span class="p">,</span> <span class="s">&#39;ISLAND_IN_LAKE&#39;</span><span class="p">,</span> <span class="s">&#39;POND_IN_ISLAND_IN_LAKE&#39;</span><span class="p">,</span>
+              <span class="s">&#39;ANTARCTIC_ICE_FRONT&#39;</span><span class="p">,</span> <span class="s">&#39;ANTARCTIC_GROUNDING_LINE&#39;</span><span class="p">]</span>
+
+    <span class="n">SOURCE</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;CIA_WDBII&#39;</span><span class="p">,</span> <span class="s">&#39;WVS&#39;</span><span class="p">,</span> <span class="s">&#39;AC&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gshhg_file</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="o">*</span><span class="n">attr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Initialise a GSHHG polygon</span>
+
+<span class="sd">        :param gshhg_file: GSHHG binary file</span>
+<span class="sd">        :type gshhg_file: str</span>
+<span class="sd">        :param offset: This polygons&#39; offset in binary file</span>
+<span class="sd">        :type offset: int</span>
+<span class="sd">        :param attr: Polygon attributes</span>
+<span class="sd">             ``(pid, npoints, _flag, west, east, south, north,</span>
+<span class="sd">              area, area_full, container, ancestor)``.</span>
+<span class="sd">              See :file:`gshhg.h` for details.</span>
+<span class="sd">        :type attr: tuple</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">west</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">east</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">south</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">north</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_full</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ancestor</span><span class="p">)</span> <span class="o">=</span> <span class="n">attr</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">west</span> <span class="o">*=</span> <span class="n">micro_deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">east</span> <span class="o">*=</span> <span class="n">micro_deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">south</span> <span class="o">*=</span> <span class="n">micro_deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">north</span> <span class="o">*=</span> <span class="n">micro_deg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">level_no</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag</span> <span class="o">&amp;</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEVELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">level_no</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">255</span>
+
+        <span class="n">cross</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">greenwhich_crossed</span> <span class="o">=</span> <span class="k">True</span> <span class="k">if</span> <span class="n">cross</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">cross</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="k">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dateline_crossed</span> <span class="o">=</span> <span class="k">True</span> <span class="k">if</span> <span class="n">cross</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">cross</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="k">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SOURCE</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_no</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SOURCE</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">river</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag</span> <span class="o">&gt;&gt;</span> <span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">1</span>
+
+        <span class="n">scale</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_flag</span> <span class="o">&gt;&gt;</span> <span class="mi">26</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">/=</span> <span class="n">scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area_full</span> <span class="o">/=</span> <span class="n">scale</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="k">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">gshhg_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">offset</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Points of the polygon as Nx2 as ``[:,[lat,lon]]``</span>
+
+<span class="sd">        :rtype: :class:`numpy.ndarray`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span>
+                    <span class="n">db</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s">&#39;&gt;i4&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>\
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>\
+                    <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npoints</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_no</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">*=</span> <span class="n">micro_deg</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_is_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">level</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">LEVELS</span><span class="p">[</span><span class="n">level</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="k">True</span>
+        <span class="k">return</span> <span class="k">False</span>
+
+<div class="viewcode-block" id="Polygon.is_land"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.is_land">[docs]</a>    <span class="k">def</span> <span class="nf">is_land</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon is land.</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_level</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Polygon.is_lake"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.is_lake">[docs]</a>    <span class="k">def</span> <span class="nf">is_lake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon is a lake.</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_level</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Polygon.is_island_in_lake"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.is_island_in_lake">[docs]</a>    <span class="k">def</span> <span class="nf">is_island_in_lake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon is an island in a lake.</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_level</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Polygon.is_pond_in_island_in_lake"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.is_pond_in_island_in_lake">[docs]</a>    <span class="k">def</span> <span class="nf">is_pond_in_island_in_lake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon is pond on an island in a lake.</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_level</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Polygon.is_antarctic_icefront"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.is_antarctic_icefront">[docs]</a>    <span class="k">def</span> <span class="nf">is_antarctic_icefront</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon antarctic icefront.</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_level</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Polygon.is_antarctic_grounding_line"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.is_antarctic_grounding_line">[docs]</a>    <span class="k">def</span> <span class="nf">is_antarctic_grounding_line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon is antarctic grounding line.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_level</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Polygon.contains_point"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.contains_point">[docs]</a>    <span class="k">def</span> <span class="nf">contains_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon contains a single `point`</span>
+
+<span class="sd">        :param point: (lat, lon) of size 2</span>
+<span class="sd">        :type point: tuple</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">south</span> <span class="o">&lt;=</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">north</span> <span class="ow">and</span>\
+           <span class="bp">self</span><span class="o">.</span><span class="n">west</span> <span class="o">&lt;=</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">east</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">orthodrome</span><span class="o">.</span><span class="n">contains_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">False</span></div>
+
+<div class="viewcode-block" id="Polygon.contains_points"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.Polygon.contains_points">[docs]</a>    <span class="k">def</span> <span class="nf">contains_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if the polygon contains a `points`</span>
+
+<span class="sd">        :param points: Array of of size Nx2</span>
+<span class="sd">        :type point: :class:`numpy.ndarray`</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">south</span> <span class="o">&lt;=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">north</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">west</span> <span class="o">&lt;=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">east</span><span class="p">],</span>
+                       <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">orthodrome</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;%s: points inside %d&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="n">r</span>
+        <span class="k">if</span> <span class="n">num</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">cond</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">num</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="n">num</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span>
+                        <span class="n">fill_value</span><span class="o">=</span><span class="k">False</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">get_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">west</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">east</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">south</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">north</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">polygon</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">level_no</span> <span class="o">&lt;</span> <span class="n">polygon</span><span class="o">.</span><span class="n">level_no</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rstr</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Polygon id: {p.pid}</span>
+<span class="s">-------------------</span>
+<span class="s">Points:     {p.npoints}</span>
+<span class="s">Level:      {p.level}</span>
+<span class="s">Area:       {p.area} km**2</span>
+<span class="s">Area Full:  {p.area_full} km**2</span>
+<span class="s">Extent:     {p.west} W, {p.east} E, {p.south} S, {p.north} N</span>
+<span class="s">Source:     {p.source}</span>
+<span class="s">Greenwhich crossed: {p.greenwhich_crossed}</span>
+<span class="s">Dateline crossed:   {p.dateline_crossed}</span>
+<span class="s">        &#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rstr</span></div>
+
+
+<div class="viewcode-block" id="GSHHG"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG">[docs]</a><span class="k">class</span> <span class="nc">GSHHG</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Holding the Global Self-consistent Hierarchical High-resolutions</span>
+<span class="sd">        Geography Database (GSHHG)</span>
+
+<span class="sd">    The class offers methods to select :class:`~pyrocko.gshhg.Polygon` s and</span>
+<span class="sd">    crop/validate single points and point-clouds.</span>
+
+<span class="sd">    .. info:</span>
+
+<span class="sd">        If the database is not available it will be downloaded and cached</span>
+<span class="sd">        automatically</span>
+
+<span class="sd">    .. note:</span>
+
+<span class="sd">        Cite Wessel, P., and W. H. F. Smith, A Global Self-consistent,</span>
+<span class="sd">        Hierarchical, High-resolution Shoreline Database,</span>
+<span class="sd">        J. Geophys. Res., 101, #B4, pp. 8741-8743, 1996.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">gshhg_url</span> <span class="o">=</span> <span class="s">&#39;http://www.soest.hawaii.edu/pwessel/gshhg/gshhg-bin-2.3.7.zip&#39;</span>
+    <span class="n">_header_struct</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">Struct</span><span class="p">(</span><span class="s">&#39;&gt;IIIiiiiIIii&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gshhg_file</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Initialise the database from GSHHG binary.</span>
+
+<span class="sd">        :param gshhg_file: Path to file</span>
+<span class="sd">        :type gshhg_file: str</span>
+<span class="sd">        :</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">gshhg_file</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_read_database</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Initialised GSHHG database from %s in [%.4f s]&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">gshhg_file</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_read_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">db</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_header_struct</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span>
+                    <span class="n">db</span><span class="o">.</span><span class="n">tell</span><span class="p">(),</span>
+                    <span class="o">*</span><span class="n">header</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+                <span class="n">offset</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_get_database</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">gshhg_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">pyrocko</span> <span class="k">import</span> <span class="n">util</span>
+            <span class="kn">import</span> <span class="nn">zipfile</span>
+
+            <span class="n">archive_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">gshhg_dir</span><span class="p">,</span>
+                                     <span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">gshhg_url</span><span class="p">))</span>
+            <span class="n">util</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">gshhg_url</span><span class="p">,</span> <span class="n">archive_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">is_zipfile</span><span class="p">(</span><span class="n">archive_path</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">util</span><span class="o">.</span><span class="n">DownloadError</span><span class="p">(</span><span class="s">&#39;GSHHG file is corrupted!&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Unzipping GSHHG database...&#39;</span><span class="p">)</span>
+            <span class="n">zipf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">archive_path</span><span class="p">)</span>
+            <span class="n">zipf</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">gshhg_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Using cached %s&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file</span>
+
+<div class="viewcode-block" id="GSHHG.get_polygons_at"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.get_polygons_at">[docs]</a>    <span class="k">def</span> <span class="nf">get_polygons_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get all polygons that intersect with a point.</span>
+
+<span class="sd">        :param lat: Latitude in [deg]</span>
+<span class="sd">        :type lat: float</span>
+<span class="sd">        :param lat: Longitude in [deg]</span>
+<span class="sd">        :type lat: float</span>
+<span class="sd">        :returns: List of :class:`~pyrocko.gshhg.Polygon`</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">west</span> <span class="o">&lt;</span> <span class="n">lon</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">east</span> <span class="o">&gt;</span> <span class="n">lon</span><span class="p">)</span> <span class="ow">and</span>\
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">south</span> <span class="o">&lt;</span> <span class="n">lat</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">north</span> <span class="o">&gt;</span> <span class="n">lat</span><span class="p">):</span>
+                <span class="n">rp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rp</span></div>
+
+<div class="viewcode-block" id="GSHHG.get_polygons_within"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.get_polygons_within">[docs]</a>    <span class="k">def</span> <span class="nf">get_polygons_within</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">west</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">south</span><span class="p">,</span> <span class="n">north</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get all polygons that intersect with a bounding box.</span>
+
+<span class="sd">        :param west: Western boundary in decimal degree</span>
+<span class="sd">        :type west: float</span>
+<span class="sd">        :param east: Eastern boundary in decimal degree</span>
+<span class="sd">        :type east: float</span>
+<span class="sd">        :param north: Northern boundary in decimal degree</span>
+<span class="sd">        :type north: float</span>
+<span class="sd">        :param south: Southern boundary in decimal degree</span>
+<span class="sd">        :type south: float</span>
+<span class="sd">        :returns: List of :class:`~pyrocko.gshhg.Polygon`</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">west</span> <span class="o">&gt;</span> <span class="n">west</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">east</span> <span class="o">&lt;</span> <span class="n">east</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">west</span> <span class="o">&lt;</span> <span class="n">west</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">east</span> <span class="o">&gt;</span> <span class="n">west</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">west</span> <span class="o">&lt;</span> <span class="n">east</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">east</span> <span class="o">&gt;</span> <span class="n">east</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">west</span> <span class="o">&gt;</span> <span class="n">west</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">east</span> <span class="o">&lt;</span> <span class="n">east</span><span class="p">))</span> <span class="ow">and</span>\
+               <span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">south</span> <span class="o">&gt;</span> <span class="n">south</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">north</span> <span class="o">&lt;</span> <span class="n">north</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">south</span> <span class="o">&lt;</span> <span class="n">south</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">north</span> <span class="o">&gt;</span> <span class="n">south</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">south</span> <span class="o">&lt;</span> <span class="n">north</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">north</span> <span class="o">&gt;</span> <span class="n">north</span><span class="p">)</span> <span class="ow">or</span>
+               <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">north</span> <span class="o">&gt;</span> <span class="n">north</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">south</span> <span class="o">&lt;</span> <span class="n">south</span><span class="p">)):</span>
+                <span class="n">rp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rp</span></div>
+
+<div class="viewcode-block" id="GSHHG.is_point_on_land"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.is_point_on_land">[docs]</a>    <span class="k">def</span> <span class="nf">is_point_on_land</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Check whether a point is on land. Consquently lakes are excluded.</span>
+
+<span class="sd">        :param lat: Latitude in [deg]</span>
+<span class="sd">        :type lat: float</span>
+<span class="sd">        :param lon: Latitude in [deg]</span>
+<span class="sd">        :type lon: float</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">relevant_polygons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_polygons_at</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
+        <span class="n">relevant_polygons</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="n">land</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">relevant_polygons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_land</span><span class="p">()</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">is_antarctic_grounding_line</span><span class="p">()</span> <span class="ow">or</span>
+               <span class="n">p</span><span class="o">.</span><span class="n">is_island_in_lake</span><span class="p">()):</span>
+                <span class="n">land</span> <span class="o">=</span> <span class="k">True</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_lake</span><span class="p">()</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">is_antarctic_icefront</span><span class="p">()</span> <span class="ow">or</span>
+                  <span class="n">p</span><span class="o">.</span><span class="n">is_pond_in_island_in_lake</span><span class="p">()):</span>
+                <span class="n">land</span> <span class="o">=</span> <span class="k">False</span>
+        <span class="k">return</span> <span class="n">land</span></div>
+
+<div class="viewcode-block" id="GSHHG.get_land_mask"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.get_land_mask">[docs]</a>    <span class="k">def</span> <span class="nf">get_land_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Get a landmask respecting lakes, and ponds in island in lake</span>
+<span class="sd">            as water</span>
+
+<span class="sd">        :param points: List of lat, lon pairs</span>
+<span class="sd">        :type points: :class:`numpy.ndarray` of shape Nx2</span>
+<span class="sd">        :return: Boolean land mask</span>
+<span class="sd">        :rtype: :class:`numpy.ndarray` of shape N</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">lats</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lons</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">west</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">south</span><span class="p">,</span> <span class="n">north</span> <span class="o">=</span> <span class="p">(</span><span class="n">lons</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">lons</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                                    <span class="n">lats</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">lats</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="n">relevant_polygons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_polygons_within</span><span class="p">(</span><span class="n">west</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">south</span><span class="p">,</span> <span class="n">north</span><span class="p">)</span>
+        <span class="n">relevant_polygons</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">num</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">relevant_polygons</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_land</span><span class="p">()</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">is_antarctic_grounding_line</span><span class="p">()</span> <span class="ow">or</span>
+               <span class="n">p</span><span class="o">.</span><span class="n">is_island_in_lake</span><span class="p">()):</span>
+                <span class="n">mask</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">is_lake</span><span class="p">()</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">is_pond_in_island_in_lake</span><span class="p">():</span>
+                <span class="n">water</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+                <span class="n">num</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">water</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GSHHG.full"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.full">[docs]</a>    <span class="k">def</span> <span class="nf">full</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Return the full-resolution GSHHG database&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_get_database</span><span class="p">(</span><span class="s">&#39;gshhs_f.b&#39;</span><span class="p">))</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GSHHG.high"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.high">[docs]</a>    <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Return the high-resolution GSHHG database&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_get_database</span><span class="p">(</span><span class="s">&#39;gshhs_h.b&#39;</span><span class="p">))</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GSHHG.intermediate"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.intermediate">[docs]</a>    <span class="k">def</span> <span class="nf">intermediate</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Return the intermediate-resolution GSHHG database&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_get_database</span><span class="p">(</span><span class="s">&#39;gshhs_i.b&#39;</span><span class="p">))</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GSHHG.low"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.low">[docs]</a>    <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Return the low-resolution GSHHG database&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_get_database</span><span class="p">(</span><span class="s">&#39;gshhs_l.b&#39;</span><span class="p">))</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="GSHHG.crude"><a class="viewcode-back" href="../../library/reference/gshhg.html#pyrocko.gshhg.GSHHG.crude">[docs]</a>    <span class="k">def</span> <span class="nf">crude</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Return the crude-resolution GSHHG database&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_get_database</span><span class="p">(</span><span class="s">&#39;gshhs_c.b&#39;</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+    &nbsp;
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+      </ul>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, The Pyrocko Developers.
+    </div>
+  </body>
+</html>

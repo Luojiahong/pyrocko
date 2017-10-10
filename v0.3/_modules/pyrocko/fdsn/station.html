@@ -54,6 +54,7 @@
           <div class="body" role="main">
             
   <h1>Source code for pyrocko.fdsn.station</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
@@ -151,8 +152,13 @@
 
                 <span class="k">except</span> <span class="n">util</span><span class="o">.</span><span class="n">TimeStrError</span><span class="p">:</span>
                     <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="n">this_year</span> <span class="o">+</span> <span class="mi">100</span><span class="p">:</span>
-                        <span class="k">return</span> <span class="k">None</span>  <span class="c"># StationXML contained a dummy end date</span>
+                    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">:</span>  <span class="c"># if we&#39;re on 64bit</span>
+                        <span class="k">if</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="n">this_year</span> <span class="o">+</span> <span class="mi">100</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="k">None</span>  <span class="c"># StationXML contained a dummy date</span>
+
+                    <span class="k">else</span><span class="p">:</span>  <span class="c"># 32bit end of time is in 2038</span>
+                        <span class="k">if</span> <span class="n">this_year</span> <span class="o">&lt;</span> <span class="mi">2037</span> <span class="ow">and</span> <span class="n">year</span> <span class="o">&gt;</span> <span class="mi">2037</span> <span class="ow">or</span> <span class="n">year</span> <span class="o">&lt;</span> <span class="mi">1903</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="k">None</span>  <span class="c"># StationXML contained a dummy date</span>
 
                     <span class="k">raise</span>
 
@@ -345,10 +351,12 @@
     <span class="n">vendor</span> <span class="o">=</span> <span class="n">Unicode</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;Vendor&#39;</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">Unicode</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;Model&#39;</span><span class="p">)</span>
     <span class="n">serial_number</span> <span class="o">=</span> <span class="n">String</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;SerialNumber&#39;</span><span class="p">)</span>
-    <span class="n">installation_date</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
-                                    <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;InstallationDate&#39;</span><span class="p">)</span>
-    <span class="n">removal_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
-                                                 <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;RemovalDate&#39;</span><span class="p">)</span>
+    <span class="n">installation_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+        <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;InstallationDate&#39;</span><span class="p">)</span>
+    <span class="n">removal_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+        <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;RemovalDate&#39;</span><span class="p">)</span>
     <span class="n">calibration_date_list</span> <span class="o">=</span> <span class="n">List</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;CalibrationDate&#39;</span><span class="p">))</span></div>
 
 
@@ -598,7 +606,7 @@
 
     <span class="nb">id</span> <span class="o">=</span> <span class="n">Counter</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmlstyle</span><span class="o">=</span><span class="s">&#39;attribute&#39;</span><span class="p">)</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">Unicode</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;Value&#39;</span><span class="p">)</span>
-    <span class="n">begin_effective_time</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+    <span class="n">begin_effective_time</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
         <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
         <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;BeginEffectiveTime&#39;</span><span class="p">)</span>
     <span class="n">end_effective_time</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
@@ -740,7 +748,7 @@
         <span class="n">stage</span> <span class="o">=</span> <span class="n">ResponseStage</span><span class="p">(</span>
             <span class="n">number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">poles_zeros_list</span><span class="o">=</span><span class="p">[</span><span class="n">pzs</span><span class="p">],</span>
-            <span class="n">stage_gain</span><span class="o">=</span><span class="n">Gain</span><span class="p">(</span><span class="n">presponse</span><span class="o">.</span><span class="n">constant</span><span class="o">/</span><span class="n">norm_factor</span><span class="p">))</span>
+            <span class="n">stage_gain</span><span class="o">=</span><span class="n">Gain</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">presponse</span><span class="o">.</span><span class="n">constant</span><span class="p">)</span><span class="o">/</span><span class="n">norm_factor</span><span class="p">))</span>
 
         <span class="n">resp</span> <span class="o">=</span> <span class="n">Response</span><span class="p">(</span>
             <span class="n">instrument_sensitivity</span><span class="o">=</span><span class="n">Sensitivity</span><span class="p">(</span>
@@ -758,7 +766,8 @@
 <span class="sd">    Channel types.&#39;&#39;&#39;</span>
 
     <span class="n">code</span> <span class="o">=</span> <span class="n">String</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">xmlstyle</span><span class="o">=</span><span class="s">&#39;attribute&#39;</span><span class="p">)</span>
-    <span class="n">start_date</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmlstyle</span><span class="o">=</span><span class="s">&#39;attribute&#39;</span><span class="p">)</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+                                               <span class="n">xmlstyle</span><span class="o">=</span><span class="s">&#39;attribute&#39;</span><span class="p">)</span>
     <span class="n">end_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
                                              <span class="n">xmlstyle</span><span class="o">=</span><span class="s">&#39;attribute&#39;</span><span class="p">)</span>
     <span class="n">restricted_status</span> <span class="o">=</span> <span class="n">RestrictedStatus</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmlstyle</span><span class="o">=</span><span class="s">&#39;attribute&#39;</span><span class="p">)</span>
@@ -831,7 +840,8 @@
     <span class="n">geology</span> <span class="o">=</span> <span class="n">Unicode</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;Geology&#39;</span><span class="p">)</span>
     <span class="n">equipment_list</span> <span class="o">=</span> <span class="n">List</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">Equipment</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;Equipment&#39;</span><span class="p">))</span>
     <span class="n">operator_list</span> <span class="o">=</span> <span class="n">List</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">Operator</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;Operator&#39;</span><span class="p">))</span>
-    <span class="n">creation_date</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;CreationDate&#39;</span><span class="p">)</span>
+    <span class="n">creation_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;CreationDate&#39;</span><span class="p">)</span>
     <span class="n">termination_date</span> <span class="o">=</span> <span class="n">DummyAwareOptionalTimestamp</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
         <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">xmltagname</span><span class="o">=</span><span class="s">&#39;TerminationDate&#39;</span><span class="p">)</span>
     <span class="n">total_number_channels</span> <span class="o">=</span> <span class="n">Counter</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
@@ -1035,6 +1045,58 @@
                         <span class="n">name</span><span class="o">=</span><span class="n">station</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">pstations</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="FDSNStationXML.from_pyrocko_stations"><a class="viewcode-back" href="../../../library/reference/fdsn.html#pyrocko.fdsn.station.FDSNStationXML.from_pyrocko_stations">[docs]</a>    <span class="k">def</span> <span class="nf">from_pyrocko_stations</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">pyrocko_stations</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Generate :py:class:`FDSNStationXML` from list of</span>
+<span class="sd">        :py:class;`pyrocko.model.Station` instances.</span>
+
+<span class="sd">        :param pyrocko_stations: list of</span>
+<span class="sd">            :py:class;`pyrocko.model.Station` instances.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+        <span class="n">network_dict</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">pyrocko_stations</span><span class="p">:</span>
+            <span class="n">network</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">location</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">nsl</span><span class="p">()</span>
+            <span class="n">channel_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+                <span class="n">channel_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Channel</span><span class="p">(</span>
+                        <span class="n">location_code</span><span class="o">=</span><span class="n">location</span><span class="p">,</span>
+                        <span class="n">code</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">latitude</span><span class="o">=</span><span class="n">Latitude</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">lat</span><span class="p">),</span>
+                        <span class="n">longitude</span><span class="o">=</span><span class="n">Longitude</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">lon</span><span class="p">),</span>
+                        <span class="n">elevation</span><span class="o">=</span><span class="n">Distance</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">elevation</span><span class="p">),</span>
+                        <span class="n">depth</span><span class="o">=</span><span class="n">Distance</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">depth</span><span class="p">),</span>
+                        <span class="n">azimuth</span><span class="o">=</span><span class="n">Azimuth</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">azimuth</span><span class="p">),</span>
+                        <span class="n">dip</span><span class="o">=</span><span class="n">Dip</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">dip</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">network_dict</span><span class="p">[</span><span class="n">network</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Station</span><span class="p">(</span>
+                    <span class="n">code</span><span class="o">=</span><span class="n">station</span><span class="p">,</span>
+                    <span class="n">latitude</span><span class="o">=</span><span class="n">Latitude</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">lat</span><span class="p">),</span>
+                    <span class="n">longitude</span><span class="o">=</span><span class="n">Longitude</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">lon</span><span class="p">),</span>
+                    <span class="n">elevation</span><span class="o">=</span><span class="n">Distance</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">elevation</span><span class="p">),</span>
+                    <span class="n">channel_list</span><span class="o">=</span><span class="n">channel_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">network_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">station_list</span> <span class="ow">in</span> <span class="n">network_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="n">network_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Network</span><span class="p">(</span>
+                    <span class="n">code</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">station_list</span><span class="o">=</span><span class="n">station_list</span><span class="p">,</span>
+                    <span class="n">total_number_stations</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">station_list</span><span class="p">)))</span>
+
+        <span class="n">sxml</span> <span class="o">=</span> <span class="n">FDSNStationXML</span><span class="p">(</span>
+            <span class="n">source</span><span class="o">=</span><span class="s">&#39;from pyrocko stations list&#39;</span><span class="p">,</span> <span class="n">created</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">network_list</span><span class="o">=</span><span class="n">network_list</span><span class="p">)</span>
+
+        <span class="n">sxml</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sxml</span></div>
 
     <span class="k">def</span> <span class="nf">iter_network_stations</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">sta</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">timespan</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>

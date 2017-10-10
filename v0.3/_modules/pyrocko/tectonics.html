@@ -59,103 +59,14 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">num</span>
-<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="k">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span> <span class="nn">pyrocko</span> <span class="k">import</span> <span class="n">util</span><span class="p">,</span> <span class="n">config</span>
 <span class="kn">from</span> <span class="nn">pyrocko.guts_array</span> <span class="k">import</span> <span class="n">Array</span>
 <span class="kn">from</span> <span class="nn">pyrocko.guts</span> <span class="k">import</span> <span class="n">Object</span><span class="p">,</span> <span class="n">String</span>
-<span class="kn">from</span> <span class="nn">pyrocko.moment_tensor</span> <span class="k">import</span> <span class="n">euler_to_matrix</span><span class="p">,</span> <span class="n">d2r</span><span class="p">,</span> <span class="n">r2d</span>
-<span class="kn">from</span> <span class="nn">pyrocko.beachball</span> <span class="k">import</span> <span class="n">spoly_cut</span>
 <span class="kn">from</span> <span class="nn">pyrocko</span> <span class="k">import</span> <span class="n">orthodrome</span> <span class="k">as</span> <span class="n">od</span>
 
 
-<span class="k">def</span> <span class="nf">latlon_to_xyz</span><span class="p">(</span><span class="n">latlons</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">latlons</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="n">latlons</span><span class="p">[</span><span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="n">points</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">latlons</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span>
-    <span class="n">lats</span> <span class="o">=</span> <span class="n">latlons</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">lons</span> <span class="o">=</span> <span class="n">latlons</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lats</span><span class="o">*</span><span class="n">d2r</span><span class="p">)</span> <span class="o">*</span> <span class="n">num</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lons</span><span class="o">*</span><span class="n">d2r</span><span class="p">)</span>
-    <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lats</span><span class="o">*</span><span class="n">d2r</span><span class="p">)</span> <span class="o">*</span> <span class="n">num</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lons</span><span class="o">*</span><span class="n">d2r</span><span class="p">)</span>
-    <span class="n">points</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lats</span><span class="o">*</span><span class="n">d2r</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">points</span>
-
-
-<span class="k">def</span> <span class="nf">xyz_to_latlon</span><span class="p">(</span><span class="n">xyz</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">xyz</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">xyz_to_latlon</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="n">latlons</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">xyz</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="n">latlons</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
-        <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">num</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">r2d</span>
-    <span class="n">latlons</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
-        <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">r2d</span>
-    <span class="k">return</span> <span class="n">latlons</span>
-
-
-<span class="k">def</span> <span class="nf">rot_to_00</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">):</span>
-    <span class="n">rot0</span> <span class="o">=</span> <span class="n">euler_to_matrix</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">90.</span><span class="o">*</span><span class="n">d2r</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span><span class="o">.</span><span class="n">A</span>
-    <span class="n">rot1</span> <span class="o">=</span> <span class="n">euler_to_matrix</span><span class="p">(</span><span class="o">-</span><span class="n">d2r</span><span class="o">*</span><span class="n">lat</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">d2r</span><span class="o">*</span><span class="n">lon</span><span class="p">)</span><span class="o">.</span><span class="n">A</span>
-    <span class="k">return</span> <span class="n">num</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot0</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">num</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot1</span><span class="p">,</span> <span class="n">rot0</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
-
-
-<span class="k">def</span> <span class="nf">distances3d</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">num</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">ndim</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-
-
-<span class="k">class</span> <span class="nc">Farside</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">pass</span>
-
-
 <span class="n">PI</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
-
-
-<span class="k">def</span> <span class="nf">circulation</span><span class="p">(</span><span class="n">points2</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">num</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">points2</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">points2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="o">*</span> <span class="p">(</span><span class="n">points2</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">points2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
-
-
-<span class="k">def</span> <span class="nf">stereographic</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
-    <span class="n">dists</span> <span class="o">=</span> <span class="n">distances3d</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
-    <span class="k">if</span> <span class="n">dists</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">maxdist</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
-        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">maxdist</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">2.</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">cutoff</span> <span class="o">=</span> <span class="mf">1.0e-5</span>
-
-    <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">num</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">cutoff</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">Farside</span><span class="p">()</span>
-
-    <span class="n">points_out</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">points_out</span> <span class="o">*=</span> <span class="n">factor</span><span class="p">[:,</span> <span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">points_out</span>
-
-
-<span class="k">def</span> <span class="nf">stereographic_poly</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
-    <span class="n">dists</span> <span class="o">=</span> <span class="n">distances3d</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:],</span> <span class="n">points</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
-    <span class="k">if</span> <span class="n">dists</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">maxdist</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
-        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">maxdist</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">2.</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">cutoff</span> <span class="o">=</span> <span class="mf">1.0e-5</span>
-
-    <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">num</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">cutoff</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">Farside</span><span class="p">()</span>
-
-    <span class="n">points_out</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-    <span class="n">points_out</span> <span class="o">*=</span> <span class="n">factor</span><span class="p">[:,</span> <span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="n">circulation</span><span class="p">(</span><span class="n">points_out</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">Farside</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">points_out</span>
 
 
 <div class="viewcode-block" id="Plate"><a class="viewcode-back" href="../../library/reference/tectonics.html#pyrocko.tectonics.Plate">[docs]</a><span class="k">class</span> <span class="nc">Plate</span><span class="p">(</span><span class="n">Object</span><span class="p">):</span>
@@ -164,60 +75,15 @@
     <span class="n">points</span> <span class="o">=</span> <span class="n">Array</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">num</span><span class="o">.</span><span class="n">float</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="k">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">max_interpoint_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">od</span><span class="o">.</span><span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
             <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[:,</span> <span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span>
 
     <span class="k">def</span> <span class="nf">contains_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
-        <span class="n">rot</span> <span class="o">=</span> <span class="n">rot_to_00</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">points_xyz</span> <span class="o">=</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
-        <span class="n">points_rot</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">points_xyz</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">spoly_cut</span><span class="p">([</span><span class="n">points_rot</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">points_g</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">points2</span> <span class="o">=</span> <span class="n">stereographic_poly</span><span class="p">(</span><span class="n">points_g</span><span class="p">)</span>
-                    <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">points2</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">contains_point</span><span class="p">((</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)):</span>
-                        <span class="k">return</span> <span class="k">True</span>
-
-                <span class="k">except</span> <span class="n">Farside</span><span class="p">:</span>
-                    <span class="k">pass</span>
-
-        <span class="k">return</span> <span class="k">False</span>
+        <span class="k">return</span> <span class="n">od</span><span class="o">.</span><span class="n">contains_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">contains_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
-        <span class="n">points_xyz</span> <span class="o">=</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
-        <span class="n">center_xyz</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">points_xyz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-        <span class="k">assert</span> <span class="n">num</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
-            <span class="n">distances3d</span><span class="p">(</span><span class="n">points_xyz</span><span class="p">,</span> <span class="n">center_xyz</span><span class="p">[</span><span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">xyz_to_latlon</span><span class="p">(</span><span class="n">center_xyz</span><span class="p">)</span>
-        <span class="n">rot</span> <span class="o">=</span> <span class="n">rot_to_00</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">)</span>
-
-        <span class="n">points_rot_xyz</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">points_xyz</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">points_rot_pro</span> <span class="o">=</span> <span class="n">stereographic</span><span class="p">(</span><span class="n">points_rot_xyz</span><span class="p">)</span>
-
-        <span class="n">poly_xyz</span> <span class="o">=</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
-        <span class="n">poly_rot_xyz</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rot</span><span class="p">,</span> <span class="n">poly_xyz</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">spoly_cut</span><span class="p">([</span><span class="n">poly_rot_xyz</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">num</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">poly_rot_group_xyz</span> <span class="ow">in</span> <span class="n">group</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">poly_rot_group_pro</span> <span class="o">=</span> <span class="n">stereographic_poly</span><span class="p">(</span><span class="n">poly_rot_group_xyz</span><span class="p">)</span>
-                    <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">poly_rot_group_pro</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#39;contains_points&#39;</span><span class="p">):</span>
-                        <span class="n">result</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">points_rot_pro</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
-                            <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">p</span><span class="o">.</span><span class="n">contains_point</span><span class="p">(</span><span class="n">points_rot_pro</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
-
-                <span class="k">except</span> <span class="n">Farside</span><span class="p">:</span>
-                    <span class="k">pass</span>
-
-        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">od</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Boundary"><a class="viewcode-back" href="../../library/reference/tectonics.html#pyrocko.tectonics.Boundary">[docs]</a><span class="k">class</span> <span class="nc">Boundary</span><span class="p">(</span><span class="n">Object</span><span class="p">):</span>
@@ -230,10 +96,10 @@
     <span class="n">itypes</span> <span class="o">=</span> <span class="n">Array</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">num</span><span class="o">.</span><span class="n">int</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="k">None</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">split_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
-        <span class="n">xyz</span> <span class="o">=</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">xyz</span> <span class="o">=</span> <span class="n">od</span><span class="o">.</span><span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
         <span class="n">xyzmid</span> <span class="o">=</span> <span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">xyz</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span> <span class="o">*</span> <span class="mf">0.5</span>
-        <span class="n">cxyz</span> <span class="o">=</span> <span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpoints</span><span class="p">)</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">distances3d</span><span class="p">(</span><span class="n">xyzmid</span><span class="p">[</span><span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">cxyz</span><span class="p">[:,</span> <span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">cxyz</span> <span class="o">=</span> <span class="n">od</span><span class="o">.</span><span class="n">latlon_to_xyz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cpoints</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">od</span><span class="o">.</span><span class="n">distances3d</span><span class="p">(</span><span class="n">xyzmid</span><span class="p">[</span><span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">cxyz</span><span class="p">[:,</span> <span class="n">num</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:])</span>
         <span class="n">idmin</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">itypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">itypes</span><span class="p">[</span><span class="n">idmin</span><span class="p">]</span>
 
@@ -285,7 +151,7 @@
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">PeterBird2003</span><span class="p">(</span><span class="n">PlatesDataset</span><span class="p">):</span>
+<div class="viewcode-block" id="PeterBird2003"><a class="viewcode-back" href="../../library/reference/tectonics.html#pyrocko.tectonics.PeterBird2003">[docs]</a><span class="k">class</span> <span class="nc">PeterBird2003</span><span class="p">(</span><span class="n">PlatesDataset</span><span class="p">):</span>
     <span class="n">__citation</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
 <span class="s">    Bird, Peter. &quot;An updated digital model of plate boundaries.&quot; Geochemistry,</span>
 <span class="s">    Geophysics, Geosystems 4.3 (2003).</span>
@@ -418,14 +284,14 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">plates</span>
+        <span class="k">return</span> <span class="n">plates</span></div>
 
 
 <span class="k">class</span> <span class="nc">StrainRateDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="k">pass</span>
 
 
-<span class="k">class</span> <span class="nc">GSRM1</span><span class="p">(</span><span class="n">StrainRateDataset</span><span class="p">):</span>
+<div class="viewcode-block" id="GSRM1"><a class="viewcode-back" href="../../library/reference/tectonics.html#pyrocko.tectonics.GSRM1">[docs]</a><span class="k">class</span> <span class="nc">GSRM1</span><span class="p">(</span><span class="n">StrainRateDataset</span><span class="p">):</span>
     <span class="n">__citation</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Kreemer, C., W.E. Holt, and A.J. Haines, &quot;An integrated</span>
 <span class="s">    global model of present-day plate motions and plate boundary deformation&quot;,</span>
 <span class="s">    Geophys. J. Int., 154, 8-34, 2003.&#39;&#39;&#39;</span>
@@ -505,7 +371,7 @@
             <span class="n">arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="n">lons</span><span class="p">,</span> <span class="n">lats</span><span class="p">,</span> <span class="n">veast</span><span class="p">,</span> <span class="n">vnorth</span><span class="p">,</span> <span class="n">veast_err</span><span class="p">,</span> <span class="n">vnorth_err</span><span class="p">,</span> <span class="n">corr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">T</span>
-        <span class="k">return</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">vnorth</span><span class="p">,</span> <span class="n">veast</span><span class="p">,</span> <span class="n">vnorth_err</span><span class="p">,</span> <span class="n">veast_err</span><span class="p">,</span> <span class="n">corr</span>
+        <span class="k">return</span> <span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">,</span> <span class="n">vnorth</span><span class="p">,</span> <span class="n">veast</span><span class="p">,</span> <span class="n">vnorth_err</span><span class="p">,</span> <span class="n">veast_err</span><span class="p">,</span> <span class="n">corr</span></div>
 </pre></div>
 
           </div>

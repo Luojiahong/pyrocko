@@ -364,7 +364,7 @@ number of decibels specified in FrequencyDBVariation.</p>
 <dl class="gattribute">
 <dt id="pyrocko.fdsn.station.Equipment.installation_date">
 <em class="property">♦ </em><code class="descname">installation_date</code><a class="headerlink" href="#pyrocko.fdsn.station.Equipment.installation_date" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<code class="xref py py-class docutils literal"><span class="pre">pyrocko.guts.Timestamp</span></code>), <em>optional</em></p>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<a class="reference internal" href="#pyrocko.fdsn.station.DummyAwareOptionalTimestamp" title="pyrocko.fdsn.station.DummyAwareOptionalTimestamp"><code class="xref py py-class docutils literal"><span class="pre">DummyAwareOptionalTimestamp</span></code></a>), <em>optional</em></p>
 </dd></dl>
 
 <dl class="gattribute">
@@ -964,7 +964,7 @@ blockettes 31, 51 and 59.</p>
 <dl class="gattribute">
 <dt id="pyrocko.fdsn.station.Comment.begin_effective_time">
 <em class="property">♦ </em><code class="descname">begin_effective_time</code><a class="headerlink" href="#pyrocko.fdsn.station.Comment.begin_effective_time" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<code class="xref py py-class docutils literal"><span class="pre">pyrocko.guts.Timestamp</span></code>), <em>optional</em></p>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<a class="reference internal" href="#pyrocko.fdsn.station.DummyAwareOptionalTimestamp" title="pyrocko.fdsn.station.DummyAwareOptionalTimestamp"><code class="xref py py-class docutils literal"><span class="pre">DummyAwareOptionalTimestamp</span></code></a>), <em>optional</em></p>
 </dd></dl>
 
 <dl class="gattribute">
@@ -1116,7 +1116,7 @@ Channel types.</p>
 <dl class="gattribute">
 <dt id="pyrocko.fdsn.station.BaseNode.start_date">
 <em class="property">♦ </em><code class="descname">start_date</code><a class="headerlink" href="#pyrocko.fdsn.station.BaseNode.start_date" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<code class="xref py py-class docutils literal"><span class="pre">pyrocko.guts.Timestamp</span></code>), <em>optional</em></p>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<a class="reference internal" href="#pyrocko.fdsn.station.DummyAwareOptionalTimestamp" title="pyrocko.fdsn.station.DummyAwareOptionalTimestamp"><code class="xref py py-class docutils literal"><span class="pre">DummyAwareOptionalTimestamp</span></code></a>), <em>optional</em></p>
 </dd></dl>
 
 <dl class="gattribute">
@@ -1337,7 +1337,7 @@ dates as the epoch start and end dates.</p>
 <dl class="gattribute">
 <dt id="pyrocko.fdsn.station.Station.creation_date">
 <em class="property">♦ </em><code class="descname">creation_date</code><a class="headerlink" href="#pyrocko.fdsn.station.Station.creation_date" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<code class="xref py py-class docutils literal"><span class="pre">pyrocko.guts.Timestamp</span></code>), <em>optional</em></p>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code> (<a class="reference internal" href="#pyrocko.fdsn.station.DummyAwareOptionalTimestamp" title="pyrocko.fdsn.station.DummyAwareOptionalTimestamp"><code class="xref py py-class docutils literal"><span class="pre">DummyAwareOptionalTimestamp</span></code></a>), <em>optional</em></p>
 </dd></dl>
 
 <dl class="gattribute">
@@ -1447,6 +1447,22 @@ more Network containers or one or more Station containers.</p>
 <dt id="pyrocko.fdsn.station.FDSNStationXML.network_list">
 <em class="property">♦ </em><code class="descname">network_list</code><a class="headerlink" href="#pyrocko.fdsn.station.FDSNStationXML.network_list" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal"><span class="pre">list</span></code> of <a class="reference internal" href="#pyrocko.fdsn.station.Network" title="pyrocko.fdsn.station.Network"><code class="xref py py-class docutils literal"><span class="pre">Network</span></code></a> objects, <em>default:</em> <code class="docutils literal"><span class="pre">[]</span></code></p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="pyrocko.fdsn.station.FDSNStationXML.from_pyrocko_stations">
+<em class="property">classmethod </em><code class="descname">from_pyrocko_stations</code><span class="sig-paren">(</span><em>pyrocko_stations</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/fdsn/station.html#FDSNStationXML.from_pyrocko_stations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.fdsn.station.FDSNStationXML.from_pyrocko_stations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate <a class="reference internal" href="#pyrocko.fdsn.station.FDSNStationXML" title="pyrocko.fdsn.station.FDSNStationXML"><code class="xref py py-class docutils literal"><span class="pre">FDSNStationXML</span></code></a> from list of
+:py:class;`pyrocko.model.Station` instances.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pyrocko_stations</strong> &#8211; list of
+:py:class;`pyrocko.model.Station` instances.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

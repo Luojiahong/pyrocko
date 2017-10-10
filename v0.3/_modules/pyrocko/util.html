@@ -1448,6 +1448,10 @@
 <span class="sd">      |  -0.00ddd  |</span>
 <span class="sd">      |  -d.dde-xx |</span>
 <span class="sd">      |  -d.dde-xxx|</span>
+<span class="sd">      |         nan|</span>
+
+
+<span class="sd">    The formatted string has length ``significant_digits * 2 + 6``.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">no_exp_range</span> <span class="o">=</span> <span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
@@ -1459,6 +1463,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;%.*E&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">significant_digits</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
     <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">significant_digits</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">+</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;nan&#39;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s">&#39;nan&#39;</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">s</span></div>
 
 
@@ -1607,17 +1613,36 @@
         <span class="k">return</span> <span class="n">parse_leap_seconds_list</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="gps_utc_offset"><a class="viewcode-back" href="../../library/reference/util.html#pyrocko.util.gps_utc_offset">[docs]</a><span class="k">def</span> <span class="nf">gps_utc_offset</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+<div class="viewcode-block" id="gps_utc_offset"><a class="viewcode-back" href="../../library/reference/util.html#pyrocko.util.gps_utc_offset">[docs]</a><span class="k">def</span> <span class="nf">gps_utc_offset</span><span class="p">(</span><span class="n">t_utc</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Time offset t_gps - t_utc for a given t_utc.&#39;&#39;&#39;</span>
     <span class="n">ls</span> <span class="o">=</span> <span class="n">read_leap_seconds2</span><span class="p">()</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span>
+    <span class="k">if</span> <span class="n">t_utc</span> <span class="o">&lt;</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">9</span>
+
     <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t_utc</span> <span class="ow">and</span> <span class="n">t_utc</span> <span class="o">&lt;</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">return</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">ls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span></div>
+
+
+<div class="viewcode-block" id="utc_gps_offset"><a class="viewcode-back" href="../../library/reference/util.html#pyrocko.util.utc_gps_offset">[docs]</a><span class="k">def</span> <span class="nf">utc_gps_offset</span><span class="p">(</span><span class="n">t_gps</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Time offset t_utc - t_gps for a given t_gps.&#39;&#39;&#39;</span>
+    <span class="n">ls</span> <span class="o">=</span> <span class="n">read_leap_seconds2</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">t_gps</span> <span class="o">&lt;</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span> <span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span> <span class="o">&lt;=</span> <span class="n">t_gps</span> \
+                <span class="ow">and</span> <span class="n">t_gps</span> <span class="o">&lt;</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span> <span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="o">-</span> <span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">9</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="make_iload_family"><a class="viewcode-back" href="../../library/reference/util.html#pyrocko.util.make_iload_family">[docs]</a><span class="k">def</span> <span class="nf">make_iload_family</span><span class="p">(</span><span class="n">iload_fh</span><span class="p">,</span> <span class="n">doc_fmt</span><span class="o">=</span><span class="s">&#39;FMT&#39;</span><span class="p">,</span> <span class="n">doc_yielded_objects</span><span class="o">=</span><span class="s">&#39;FMT&#39;</span><span class="p">):</span>

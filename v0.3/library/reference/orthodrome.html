@@ -742,6 +742,122 @@ poles.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="pyrocko.orthodrome.geodetic_to_ecef">
+<code class="descname">geodetic_to_ecef</code><span class="sig-paren">(</span><em>lat</em>, <em>lon</em>, <em>alt</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#geodetic_to_ecef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.geodetic_to_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert geodetic coordinates to Earth-Centered, Earth-Fixed (ECEF)
+Cartesian coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lat</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Geodetic latitude in [deg].</li>
+<li><strong>lon</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Geodetic longitude in [deg].</li>
+<li><strong>alt</strong> (<a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Geodetic altitude (height) in [m] (positive for points outside
+the geoid).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ECEF Cartesian coordinates (X, Y, Z) in [m].</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#tuple" title="(in Python v2.7)">tuple</a>, <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td><a class="reference external" href="https://en.wikipedia.org/wiki/ECEF">https://en.wikipedia.org/wiki/ECEF</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[4]</td><td><a class="reference external" href="https://en.wikipedia.org/wiki/Geographic_coordinate_conversion">https://en.wikipedia.org/wiki/Geographic_coordinate_conversion</a>
+#From_geodetic_to_ECEF_coordinates</td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.ecef_to_geodetic">
+<code class="descname">ecef_to_geodetic</code><span class="sig-paren">(</span><em>X</em>, <em>Y</em>, <em>Z</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#ecef_to_geodetic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.ecef_to_geodetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Earth-Centered, Earth-Fixed (ECEF) Cartesian coordinates to
+geodetic coordinates (Ferrari&#8217;s solution).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Y</strong><strong>, </strong><strong>Z</strong> (<em>X</em><em>,</em><em></em>) &#8211; Cartesian coordinates in ECEF system in [m].</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Geodetic coordinates (lat, lon, alt). Latitude and longitude are
+in [deg] and altitude is in [m]
+(positive for points outside the geoid).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2.7/library/functions.html#tuple" title="(in Python v2.7)">tuple</a>, <a class="reference external" href="https://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="https://en.wikipedia.org/wiki/Geographic_coordinate_conversion">https://en.wikipedia.org/wiki/Geographic_coordinate_conversion</a>
+#The_application_of_Ferrari.27s_solution</p>
+</div>
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyrocko.orthodrome.Farside">
+<em class="property">exception </em><code class="descname">Farside</code><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#Farside"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.Farside" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.latlon_to_xyz">
+<code class="descname">latlon_to_xyz</code><span class="sig-paren">(</span><em>latlons</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#latlon_to_xyz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.latlon_to_xyz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.xyz_to_latlon">
+<code class="descname">xyz_to_latlon</code><span class="sig-paren">(</span><em>xyz</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#xyz_to_latlon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.xyz_to_latlon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.rot_to_00">
+<code class="descname">rot_to_00</code><span class="sig-paren">(</span><em>lat</em>, <em>lon</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#rot_to_00"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.rot_to_00" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.distances3d">
+<code class="descname">distances3d</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#distances3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.distances3d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.circulation">
+<code class="descname">circulation</code><span class="sig-paren">(</span><em>points2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#circulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.circulation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.stereographic">
+<code class="descname">stereographic</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#stereographic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.stereographic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.stereographic_poly">
+<code class="descname">stereographic_poly</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#stereographic_poly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.stereographic_poly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.contains_point">
+<code class="descname">contains_point</code><span class="sig-paren">(</span><em>polygon</em>, <em>point</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#contains_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.contains_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyrocko.orthodrome.contains_points">
+<code class="descname">contains_points</code><span class="sig-paren">(</span><em>polygon</em>, <em>points</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/orthodrome.html#contains_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.orthodrome.contains_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 
 

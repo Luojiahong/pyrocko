@@ -29,8 +29,8 @@
           href="../../_static/opensearch.xml"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Accessing crustal velocity databases" href="velocity_databases.html" />
-    <link rel="prev" title="Calculation of Green’s function databases" href="gf_store.html" />
+    <link rel="next" title="Geodesic functions" href="orthodrome.html" />
+    <link rel="prev" title="Traveltime calculation and raytracing" href="cake_raytracing.html" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <link rel="shortcut icon" type="image/png" href="../../_static/favicon.png" />
     <meta name="viewport" content="width=device-width,initial-scale=0.8">
@@ -58,8 +58,8 @@
             
   <div class="section" id="forward-modeling-synthetic-seismograms-and-displacements">
 <h1>Forward modeling synthetic seismograms and displacements<a class="headerlink" href="#forward-modeling-synthetic-seismograms-and-displacements" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="calculate-synthetic-seismograms-from-a-local-store">
-<h2>Calculate synthetic seismograms from a local store<a class="headerlink" href="#calculate-synthetic-seismograms-from-a-local-store" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="calculate-synthetic-seismograms-from-a-local-gf-store">
+<h2>Calculate synthetic seismograms from a local GF store<a class="headerlink" href="#calculate-synthetic-seismograms-from-a-local-gf-store" title="Permalink to this headline">¶</a></h2>
 <p>It is assumed that a <a class="reference internal" href="../reference/gf.html#pyrocko.gf.store.Store" title="pyrocko.gf.store.Store"><code class="xref py py-class docutils literal"><span class="pre">Store</span></code></a> with store ID
 <em>crust2_dd</em> has been downloaded in advance. A list of currently available
 stores can be found at <a class="reference external" href="http://kinherd.org/gfs.html">http://kinherd.org/gfs.html</a> as well as how to download
@@ -131,8 +131,8 @@ such stores.</p>
 <p class="caption"><span class="caption-text">Synthetic seismograms calculated through <a class="reference internal" href="../reference/gf.html#module-pyrocko.gf" title="pyrocko.gf"><code class="xref py py-class docutils literal"><span class="pre">pyrocko.gf</span></code></a> displayed in <a class="reference internal" href="../../apps/snuffler/index.html"><span class="doc">Snuffler</span></a>. The three traces show the east, north and vertical synthetical displacement stimulated by a double-couple source at 155 km distance.</span></p>
 </div>
 </div>
-<div class="section" id="calculate-spatial-surface-displacement-from-a-local-store">
-<h2>Calculate spatial surface displacement from a local store<a class="headerlink" href="#calculate-spatial-surface-displacement-from-a-local-store" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="calculate-spatial-surface-displacement-from-a-local-gf-store">
+<h2>Calculate spatial surface displacement from a local GF store<a class="headerlink" href="#calculate-spatial-surface-displacement-from-a-local-gf-store" title="Permalink to this headline">¶</a></h2>
 <p>In this example we create a <a class="reference internal" href="../reference/gf.html#pyrocko.gf.seismosizer.RectangularSource" title="pyrocko.gf.seismosizer.RectangularSource"><code class="xref py py-class docutils literal"><span class="pre">RectangularSource</span></code></a> and compute the spatial static/geodetic displacement caused by that rupture.</p>
 <p>We will utilize <a class="reference internal" href="../reference/gf.html#pyrocko.gf.seismosizer.LocalEngine" title="pyrocko.gf.seismosizer.LocalEngine"><code class="xref py py-class docutils literal"><span class="pre">LocalEngine</span></code></a>, <a class="reference internal" href="../reference/gf.html#pyrocko.gf.targets.StaticTarget" title="pyrocko.gf.targets.StaticTarget"><code class="xref py py-class docutils literal"><span class="pre">StaticTarget</span></code></a> and <a class="reference internal" href="../reference/gf.html#pyrocko.gf.targets.SatelliteTarget" title="pyrocko.gf.targets.SatelliteTarget"><code class="xref py py-class docutils literal"><span class="pre">SatelliteTarget</span></code></a>.</p>
 <div class="figure align-center" id="id2">
@@ -609,10 +609,10 @@ fault and one thrust fault. LOS as for Sentinel-1 satellite (Look Angle:
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="velocity_databases.html" title="Accessing crustal velocity databases"
+          <a href="orthodrome.html" title="Geodesic functions"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="gf_store.html" title="Calculation of Green’s function databases"
+          <a href="cake_raytracing.html" title="Traveltime calculation and raytracing"
              accesskey="P">previous</a> |</li>
       </ul>
     </div>

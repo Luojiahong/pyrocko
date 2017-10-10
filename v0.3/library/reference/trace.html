@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="The util module" href="util.html" />
-    <link rel="prev" title="The tectonics module" href="tectonics.html" />
+    <link rel="prev" title="The Automap module" href="automap.html" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <link rel="shortcut icon" type="image/png" href="../../_static/favicon.png" />
     <meta name="viewport" content="width=device-width,initial-scale=0.8">
@@ -1477,7 +1477,7 @@ function.</li>
 <dt id="pyrocko.trace.AnalogFilterResponse">
 <em class="property">class </em><code class="descname">AnalogFilterResponse</code><span class="sig-paren">(</span><em>b</em>, <em>a</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/trace.html#AnalogFilterResponse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.trace.AnalogFilterResponse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Frequency response of an analog filter.</p>
-<p>(see <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqs.html#scipy.signal.freqs" title="(in SciPy v0.19.0)"><code class="xref py py-func docutils literal"><span class="pre">scipy.signal.freqs()</span></code></a>).</p>
+<p>(see <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.freqs.html#scipy.signal.freqs" title="(in SciPy v0.19.1)"><code class="xref py py-func docutils literal"><span class="pre">scipy.signal.freqs()</span></code></a>).</p>
 <dl class="gattribute">
 <dt id="pyrocko.trace.AnalogFilterResponse.b">
 <em class="property">♦ </em><code class="descname">b</code><a class="headerlink" href="#pyrocko.trace.AnalogFilterResponse.b" title="Permalink to this definition">¶</a></dt>
@@ -1590,7 +1590,7 @@ recursion which is normally used.</p>
 <code class="descname">co_lfilter</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/trace.html#co_lfilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.trace.co_lfilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Successively filter broken continuous trace data (coroutine).</p>
 <p>Create coroutine which takes <a class="reference internal" href="#pyrocko.trace.Trace" title="pyrocko.trace.Trace"><code class="xref py py-class docutils literal"><span class="pre">Trace</span></code></a> objects, filters their data
-through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.lfilter.html#scipy.signal.lfilter" title="(in SciPy v0.19.0)"><code class="xref py py-func docutils literal"><span class="pre">scipy.signal.lfilter()</span></code></a> and sends new <a class="reference internal" href="#pyrocko.trace.Trace" title="pyrocko.trace.Trace"><code class="xref py py-class docutils literal"><span class="pre">Trace</span></code></a>
+through <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.lfilter.html#scipy.signal.lfilter" title="(in SciPy v0.19.1)"><code class="xref py py-func docutils literal"><span class="pre">scipy.signal.lfilter()</span></code></a> and sends new <a class="reference internal" href="#pyrocko.trace.Trace" title="pyrocko.trace.Trace"><code class="xref py py-class docutils literal"><span class="pre">Trace</span></code></a>
 objects containing the filtered data to target. This is useful, if one
 wants to filter a long continuous time series, which is split into many
 successive traces without producing filter artifacts at trace boundaries.</p>
@@ -1754,7 +1754,7 @@ according to norm.</p>
           <a href="util.html" title="The util module"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="tectonics.html" title="The tectonics module"
+          <a href="automap.html" title="The Automap module"
              accesskey="P">previous</a> |</li>
       </ul>
     </div>
