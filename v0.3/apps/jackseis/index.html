@@ -29,7 +29,7 @@
           href="../../_static/opensearch.xml"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Library" href="../../library/index.html" />
+    <link rel="next" title="File formats" href="../../formats/index.html" />
     <link rel="prev" title="Fomosto backends" href="../fomosto/backends.html" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <link rel="shortcut icon" type="image/png" href="../../_static/favicon.png" />
@@ -60,7 +60,9 @@
 <p>Jackseis is a simple tool to convert seismic waveform archive datasets. It can
 be used to downsample, rename meta-data, to cut out time windows, to convert
 between different file formats, and to convert the sample data types.</p>
-<p>Jackseis is a command line tool, for example, to convert a dataset with
+<div class="section" id="synopsis">
+<h2>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h2>
+<p>Jackseis is a command line tool. For example, to convert a dataset with
 day-files into hour-files, you could use a command as follows:</p>
 <div class="highlight-sh"><div class="highlight"><pre>jackseis &lt;input-directory&gt; --tinc<span class="o">=</span><span class="m">3600</span> --output-dir<span class="o">=</span>&lt;output-directory&gt;
 </pre></div>
@@ -71,6 +73,9 @@ by station, in chronological order. The <code class="docutils literal"><span cla
 create files of one hour length and the <code class="docutils literal"><span class="pre">--output-dir=...</span></code> option to store
 output to the given output directory creating files using a predefined naming
 scheme.</p>
+</div>
+<div class="section" id="configuring-the-naming-of-output-files">
+<h2>Configuring the naming of output files<a class="headerlink" href="#configuring-the-naming-of-output-files" title="Permalink to this headline">¶</a></h2>
 <p>If more control on the output file naming is needed, use the
 <code class="docutils literal"><span class="pre">--output=TEMPLATE</span></code> option. With this option, quite arbitrary directory
 structures can be created. For example, to pack subdirectories by year, network
@@ -88,12 +93,16 @@ template placeholders. It will create sub-directories as neccessary. Running
 Jackseis several times with the same output template will add new data to an
 existing dataset. Jackseis refuses to overwrite existing files, unless the
 <code class="docutils literal"><span class="pre">--force</span></code> option is given.</p>
+</div>
+<div class="section" id="further-options">
+<h2>Further options<a class="headerlink" href="#further-options" title="Permalink to this headline">¶</a></h2>
 <p>Additional options exist, e.g. to downsample (<code class="docutils literal"><span class="pre">--downsample=...</span></code>), to
 replace/rename meta-data (<code class="docutils literal"><span class="pre">--rename-...</span></code>), to cut out time windows
 (<code class="docutils literal"><span class="pre">--tmin=...</span></code>, <code class="docutils literal"><span class="pre">--tmax=...</span></code>), to convert between different data formats
-(<code class="docutils literal"><span class="pre">--format=...</span></code>, <code class="docutils literal"><span class="pre">--output-format=...</span></code>), and to convert the sample data types
-(<code class="docutils literal"><span class="pre">--output-data-type=...</span></code>). See <code class="docutils literal"><span class="pre">jackseis</span> <span class="pre">--help</span></code> to find out more about any of
-the available options.</p>
+(<code class="docutils literal"><span class="pre">--format=...</span></code>, <code class="docutils literal"><span class="pre">--output-format=...</span></code>), and to convert the sample data
+types (<code class="docutils literal"><span class="pre">--output-data-type=...</span></code>).</p>
+<p>Run <code class="docutils literal"><span class="pre">jackseis</span> <span class="pre">--help</span></code> to find out more about any of the available options.</p>
+</div>
 </div>
 
 
@@ -112,7 +121,7 @@ the available options.</p>
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../library/index.html" title="Library"
+          <a href="../../formats/index.html" title="File formats"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../fomosto/backends.html" title="Fomosto backends"

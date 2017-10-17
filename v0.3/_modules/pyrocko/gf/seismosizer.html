@@ -1174,7 +1174,27 @@
             <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">magnitude</span><span class="o">=</span><span class="n">ev</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
 
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SourceWithMagnitude</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">from_pyrocko_event</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SourceWithMagnitude</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">from_pyrocko_event</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">outline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cs</span><span class="o">=</span><span class="s">&#39;xyz&#39;</span><span class="p">):</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">num</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+
+        <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">north_shift</span>
+        <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">east_shift</span>
+        <span class="n">points</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="o">==</span> <span class="s">&#39;xyz&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">points</span>
+        <span class="k">elif</span> <span class="n">cs</span> <span class="o">==</span> <span class="s">&#39;xy&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">points</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">cs</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;latlon&#39;</span><span class="p">,</span> <span class="s">&#39;lonlat&#39;</span><span class="p">):</span>
+            <span class="n">latlon</span> <span class="o">=</span> <span class="n">ne_to_latlon</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">latlon</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">latlon</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">if</span> <span class="n">cs</span> <span class="o">==</span> <span class="s">&#39;latlon&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">latlon</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">latlon</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="ExplosionSource"><a class="viewcode-back" href="../../../library/reference/gf.html#pyrocko.gf.seismosizer.ExplosionSource">[docs]</a><span class="k">class</span> <span class="nc">ExplosionSource</span><span class="p">(</span><span class="n">SourceWithMagnitude</span><span class="p">):</span>
@@ -1182,30 +1202,77 @@
 <span class="sd">    An isotropic explosion point source.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
+    <span class="n">volume_change</span> <span class="o">=</span> <span class="n">Float</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">&#39;Volume change of the explosion/implosion or &#39;</span>
+             <span class="s">&#39;the contracting/extending magmatic source. [m^3]&#39;</span><span class="p">)</span>
+
+    <span class="n">interpolation</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">InterpolationMethod</span><span class="o">.</span><span class="n">T</span><span class="p">(</span>
+        <span class="n">optional</span><span class="o">=</span><span class="k">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s">&#39;nearest_neighbor&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s">&#39;Shear moduli interpolation technique for volume/moment&#39;</span>
+             <span class="s">&#39; conversion&#39;</span><span class="p">)</span>
+
     <span class="n">discretized_source_class</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">DiscretizedExplosionSource</span>
 
-    <span class="k">def</span> <span class="nf">base_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Source</span><span class="o">.</span><span class="n">base_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">get_factor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">mt</span><span class="o">.</span><span class="n">magnitude_to_moment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnitude</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">discretize_basesource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="k">None</span><span class="p">):</span>
         <span class="n">times</span><span class="p">,</span> <span class="n">amplitudes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">effective_stf_pre</span><span class="p">()</span><span class="o">.</span><span class="n">discretize_t</span><span class="p">(</span>
             <span class="n">store</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">deltat</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_change</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span>
+                <span class="n">num</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">north_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">east_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">]))</span>
+
+            <span class="n">shear_moduli</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_shear_moduli</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">,</span>
+                <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">moment</span> <span class="o">=</span> <span class="mf">3.</span> <span class="o">*</span> <span class="n">shear_moduli</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_change</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="k">True</span>
+
         <span class="k">return</span> <span class="n">meta</span><span class="o">.</span><span class="n">DiscretizedExplosionSource</span><span class="p">(</span>
             <span class="n">m0s</span><span class="o">=</span><span class="n">amplitudes</span><span class="p">,</span>
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_dparams_base_repeated</span><span class="p">(</span><span class="n">times</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">_is_initialized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_change</span> <span class="ow">is</span> <span class="ow">not</span> <span class="k">None</span>\
+         <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_initialized&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">BadRequest</span><span class="p">(</span><span class="s">&#39;Explosion source with volume_change is not&#39;</span>
+                             <span class="s">&#39; initilized. Run `discretize_basesource`&#39;</span>
+                             <span class="s">&#39; to initialize.&#39;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">pyrocko_moment_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span><span class="p">()</span>
         <span class="n">m0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moment</span>
         <span class="k">return</span> <span class="n">mt</span><span class="o">.</span><span class="n">MomentTensor</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="n">mt</span><span class="o">.</span><span class="n">symmat6</span><span class="p">(</span><span class="n">m0</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">pyrocko_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">SourceWithMagnitude</span><span class="o">.</span><span class="n">pyrocko_event</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">moment_tensor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pyrocko_moment_tensor</span><span class="p">(),</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_volume_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store</span><span class="p">):</span>
+        <span class="c"># Assumes incompressibility!</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_change</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="n">num</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span>
+                <span class="n">num</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">north_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">east_shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">]))</span>
+
+            <span class="n">shear_moduli</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get_shear_moduli</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span>
+                <span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">,</span>
+                <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moment</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">shear_moduli</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_change</span></div>
 
 
 <div class="viewcode-block" id="RectangularExplosionSource"><a class="viewcode-back" href="../../../library/reference/gf.html#pyrocko.gf.seismosizer.RectangularExplosionSource">[docs]</a><span class="k">class</span> <span class="nc">RectangularExplosionSource</span><span class="p">(</span><span class="n">ExplosionSource</span><span class="p">):</span>

@@ -736,6 +736,20 @@ but is only possible when a common STF is used for all subsources.</p>
 <em class="property">class </em><code class="descname">ExplosionSource</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pyrocko/gf/seismosizer.html#ExplosionSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyrocko.gf.seismosizer.ExplosionSource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pyrocko.gf.seismosizer.SourceWithMagnitude" title="pyrocko.gf.seismosizer.SourceWithMagnitude"><code class="xref py py-class docutils literal"><span class="pre">pyrocko.gf.seismosizer.SourceWithMagnitude</span></code></a></p>
 <p>An isotropic explosion point source.</p>
+<dl class="gattribute">
+<dt id="pyrocko.gf.seismosizer.ExplosionSource.volume_change">
+<em class="property">♦ </em><code class="descname">volume_change</code><a class="headerlink" href="#pyrocko.gf.seismosizer.ExplosionSource.volume_change" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">float</span></code>, <em>optional</em></p>
+<p>Volume change of the explosion/implosion or the contracting/extending magmatic source. [m^3]</p>
+</dd></dl>
+
+<dl class="gattribute">
+<dt id="pyrocko.gf.seismosizer.ExplosionSource.interpolation">
+<em class="property">♦ </em><code class="descname">interpolation</code><a class="headerlink" href="#pyrocko.gf.seismosizer.ExplosionSource.interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">str</span></code> (<a class="reference internal" href="#pyrocko.gf.meta.InterpolationMethod" title="pyrocko.gf.meta.InterpolationMethod"><code class="xref py py-class docutils literal"><span class="pre">pyrocko.gf.meta.InterpolationMethod</span></code></a>), <em>optional</em>, <em>default:</em> <code class="docutils literal"><span class="pre">'nearest_neighbor'</span></code></p>
+<p>Shear moduli interpolation technique for volume/moment conversion</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="pyrocko.gf.seismosizer.ExplosionSource.discretized_source_class">
 <code class="descname">discretized_source_class</code><a class="headerlink" href="#pyrocko.gf.seismosizer.ExplosionSource.discretized_source_class" title="Permalink to this definition">¶</a></dt>

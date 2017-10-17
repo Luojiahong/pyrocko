@@ -62,6 +62,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 
 <span class="kn">from</span> <span class="nn">pyrocko</span> <span class="k">import</span> <span class="n">trace</span><span class="p">,</span> <span class="n">pile</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">eventdata</span><span class="p">,</span> <span class="n">util</span>
 
@@ -297,11 +298,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">station_headers_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span><span class="p">,</span> <span class="s">&#39;station_header_infos&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_unpack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutil</span> <span class="o">=</span> <span class="n">shutil</span>
 
     <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span> <span class="nn">shutil</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span><span class="p">:</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SeedVolumeAccess.get_pile"><a class="viewcode-back" href="../../library/reference/rdseed.html#pyrocko.rdseed.SeedVolumeAccess.get_pile">[docs]</a>    <span class="k">def</span> <span class="nf">get_pile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pile</span> <span class="ow">is</span> <span class="k">None</span><span class="p">:</span>
@@ -310,6 +311,19 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_pile</span><span class="o">.</span><span class="n">load_files</span><span class="p">(</span><span class="n">fns</span><span class="p">,</span> <span class="n">fileformat</span><span class="o">=</span><span class="s">&#39;sac&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pile</span></div>
+
+<div class="viewcode-block" id="SeedVolumeAccess.get_stationxml"><a class="viewcode-back" href="../../library/reference/rdseed.html#pyrocko.rdseed.SeedVolumeAccess.get_stationxml">[docs]</a>    <span class="k">def</span> <span class="nf">get_stationxml</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">stations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_stations</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">respfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">station</span> <span class="ow">in</span> <span class="n">stations</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">station</span><span class="o">.</span><span class="n">get_channels</span><span class="p">():</span>
+                <span class="n">nslc</span> <span class="o">=</span> <span class="n">station</span><span class="o">.</span><span class="n">nsl</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">channel</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
+                <span class="n">respfile</span> <span class="o">=</span> <span class="n">pjoin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span><span class="p">,</span> <span class="s">&#39;RESP.%s.%s.%s.%s&#39;</span> <span class="o">%</span> <span class="n">nslc</span><span class="p">)</span>
+                <span class="n">respfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">respfile</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">pyrocko.fdsn</span> <span class="k">import</span> <span class="n">resp</span>
+        <span class="n">sxml</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">make_stationxml</span><span class="p">(</span><span class="n">stations</span><span class="p">,</span> <span class="n">resp</span><span class="o">.</span><span class="n">iload</span><span class="p">(</span><span class="n">respfiles</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">sxml</span></div>
 
 <div class="viewcode-block" id="SeedVolumeAccess.get_restitution"><a class="viewcode-back" href="../../library/reference/rdseed.html#pyrocko.rdseed.SeedVolumeAccess.get_restitution">[docs]</a>    <span class="k">def</span> <span class="nf">get_restitution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tr</span><span class="p">,</span> <span class="n">allowed_methods</span><span class="p">):</span>
         <span class="k">if</span> <span class="s">&#39;evalresp&#39;</span> <span class="ow">in</span> <span class="n">allowed_methods</span><span class="p">:</span>
